@@ -18,8 +18,26 @@ var board = new five.Board({
 board.on('ready', function () {
     var speed, commands, motors;
     motors = {
-        a: new five.Motor([3, 12]),
-        b: new five.Motor([11, 13])
+        a: new five.Motor(
+            // [3, 5]
+            {
+                pins: {
+                  pwm: 5,
+                  dir: 3
+                },
+                invertPWM: true
+            }
+        ),
+        b: new five.Motor(
+            //[9, 10]
+            {
+                pins: {
+                  pwm: 10,
+                  dir: 9
+                },
+                invertPWM: true
+            }
+        )
     };
 
     commands = null;
