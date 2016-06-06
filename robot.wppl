@@ -23,13 +23,13 @@ var updatePosition = function(position, robotCommand, delay) {
 		return {
 			x: position.x,
 			y: position.y,
-			theta: position.theta + turnPerSec*delay;
+			theta: position.theta + turnPerSec*delay
 		}
 	} else if (robotCommand=='turnRight') {
 		return {
 			x: position.x,
 			y: position.y,
-			theta: position.theta - turnPerSec*delay;
+			theta: position.theta - turnPerSec*delay
 		}
 	} else {
 		return position;
@@ -39,27 +39,38 @@ var updatePosition = function(position, robotCommand, delay) {
 var move = function(n, position) {
 	var position = position?position:{x:0, y:0, theta:0};
 
-	// sample robot commands
-	var delay = randomInteger(5)+1;
-	var robotCommand = uniformDraw([
-		'moveForward',
-		'turnRight',
-		'turnLeft',
-		'moveReverse',
-		'stop'
-	]);
+	// var commands = Infer(
+	// 	{method: 'rejection'},
+	// 	function() {
+			// sample robot commands
+			var delay = randomInteger(5)+1;
+			var robotCommand = uniformDraw([
+				'moveForward',
+				'turnRight',
+				'turnLeft',
+				'moveReverse',
+				'stop'
+			]);
 
-	// predict new position
-	var newpos = updatePosition(position, direction, delay);
+			// predict new position
+			var newpos = updatePosition(position, robotCommand, delay);
+			
+	// 		return [robotCommand, delay, newpos];
+	// 	}
+	// )
+
+	// var robotCommand = commands[0];
+	// var delay = commands[1];
+	// var newpos = commands[2]
 	console.log(newpos);
 
 	// actually move
-	display(direction + ' for ' + delay + 's');
-	var robotMovement = robot[direction];
+	display(robotCommand + ' for ' + delay + 's');
+	var robotMovement = robot[robotCommand];
 	robotMovement(delay);
 
 	// continue
-	move(n-1, newx, newy, newtheta);
+	move(n-1, newpos);
 };
 
 move(20);
