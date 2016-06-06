@@ -3,7 +3,7 @@ display('start');
 var connect = robot.connect;
 connect();
 
-var secPerFullTurn = 10;
+var secPerFullTurn = 8.75;
 var turnPerSec = secPerFullTurn / (2*Math.PI);
 
 var updatePosition = function(position, robotCommand, delay) {
@@ -23,13 +23,13 @@ var updatePosition = function(position, robotCommand, delay) {
 		return {
 			x: position.x,
 			y: position.y,
-			theta: position.theta + turnPerSec*delay;
+			theta: position.theta + turnPerSec*delay
 		}
 	} else if (robotCommand=='turnRight') {
 		return {
 			x: position.x,
 			y: position.y,
-			theta: position.theta - turnPerSec*delay;
+			theta: position.theta - turnPerSec*delay
 		}
 	} else {
 		return position;
@@ -39,30 +39,55 @@ var updatePosition = function(position, robotCommand, delay) {
 var move = function(n, position) {
 	var position = position?position:{x:0, y:0, theta:0};
 
-	// sample robot commands
-	var delay = randomInteger(5)+1;
-	var robotCommand = uniformDraw([
-		'moveForward',
-		'turnRight',
-		'turnLeft',
-		'moveReverse',
-		'stop'
-	]);
+	var commands = sample(Infer(
+		{method: 'rejection', samples: 1},
+		function() {
+			// sample robot commands
+			var delay = (randomInteger(10)+1)/10;
+			var robotCommand = uniformDraw([
+				'moveForward',
+				'turnRight',
+				'turnLeft',
+				'moveReverse',
+				'stop'
+			]);
 
-	// predict new position
-	var newpos = updatePosition(position, direction, delay);
+			// predict new position
+			var newpos = updatePosition(position, robotCommand, delay);
+			
+			factor(-Math.abs(newpos.x));
+			factor(-Math.abs(newpos.y));
+
+			return [robotCommand, delay, newpos];
+		}
+	));
+
+	var robotCommand = commands[0];
+	var delay = commands[1];
+	var newpos = commands[2]
+	console.log(robotCommand);
+	console.log(delay);
 	console.log(newpos);
 
 	// actually move
-	display(direction + ' for ' + delay + 's');
-	var robotMovement = robot[direction];
+	display(robotCommand + ' for ' + delay + 's');
+	var robotMovement = robot[robotCommand];
 	robotMovement(delay);
 
 	// continue
-	move(n-1, newx, newy, newtheta);
+	move(n-1, newpos);
 };
 
 move(20);
+
+// var turnRight = robot.turnRight;
+// turnRight(8.75);
+// // var turnLeft = robot.turnLeft;
+// // turnLeft(8.5);
+
+var stop = robot.stop;
+stop();
+
 
 // display('connected');
 // var moveForward = robot.moveForward;
