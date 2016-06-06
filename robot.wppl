@@ -11,11 +11,21 @@ var printLocationEstimate = function(positionDist) {
 		function() {
 			var pos = sample(positionDist);
 			return {
-				x: Math.round(pos.x*100)/100,
-				y: Math.round(pos.y*100)/100
+				x: Math.round(pos.x/10),
+				y: Math.round(pos.y/10)
 			}
 		}
 	);
+	map(function(x) {
+		display(
+			map(function(y) {
+				var pos = {x: x, y: y};
+				return Math.round(Math.exp(discretizedLocation.score(pos))*10)/10;
+			}, robot.range(-10, 10))
+		);
+	}, robot.range(-10, 10));
+
+	display(discretizedLocation.support());
 };
 
 var getLeftDistance = robot.getLeftDistance;
@@ -54,6 +64,18 @@ var updatePosition = function(position, robotCommand, delay) {
 	}
 }
 
+var robotCommandPrior = function() {
+		categorical(
+			[2,1,1,1,.5], // weights on possible commands
+			['moveForward',
+			'turnRight',
+			'turnLeft',
+			'moveReverse',
+			'stop'
+		]);
+}
+
+
 var initialPosDist = Infer({method: 'enumerate'}, function() {return {x:0, y:0, theta:0}});
 
 var autonomous = function(positionDist) {
@@ -66,16 +88,10 @@ var autonomous = function(positionDist) {
 		{method: 'enumerate'},
 		function() {
 			var position = sample(positionDist);
+			var robotCommand = robotCommandPrior();
 
 			// sample robot commands
 			var delay = (randomInteger(10)+1)/10;
-			var robotCommand = uniformDraw([
-				'moveForward',
-				'turnRight',
-				'turnLeft',
-				'moveReverse',
-				'stop'
-			]);
 
 			if(ldistance > 10 | rdistance < 10) {
 				condition(robotCommand=='moveReverse');
@@ -146,4 +162,4 @@ stop();
 // moveForward();
 // display('moveForward');
 
-"finished";
+// "finished";
