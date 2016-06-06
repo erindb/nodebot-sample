@@ -1,2 +1,8 @@
 .idea/
-node_modules/
+node_modules/express
+node_modules/johnny-five
+node_modules/serialport
+node_modules/sleep
+node_modules/socket.io
+node_modules/socket.io-client
+node_modules/.bin
