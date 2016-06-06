@@ -62,7 +62,7 @@ board.on('ready', function () {
 
         socket.on('reverse', function (data) {
             console.log('robot recieved reverse signal')
-            speed = 120;
+            speed = 150;
             motors.a.rev(speed);
             motors.b.rev(speed);
             socket.emit('done', data);
@@ -70,8 +70,8 @@ board.on('ready', function () {
 
         socket.on('left', function (data) {
             console.log('robot recieved left signal')
-            var aSpeed = 220;
-            var bSpeed = 50;
+            var aSpeed = 150;
+            var bSpeed = 150;
             motors.a.fwd(aSpeed);
             motors.b.rev(bSpeed);
             socket.emit('done', data);
@@ -79,8 +79,8 @@ board.on('ready', function () {
 
         socket.on('right', function (data) {
             console.log('robot recieved right signal')
-            var aSpeed = 50;
-            var bSpeed = 220;
+            var aSpeed = 150;
+            var bSpeed = 150;
             motors.a.rev(aSpeed);
             motors.b.fwd(bSpeed);
             socket.emit('done', data);
