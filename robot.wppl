@@ -5,22 +5,46 @@ display('start');
 var connect = robot.connect;
 connect();
 
+var printLocationEstimate = function(positionDist) {
+	var discretizedLocation = Infer(
+		{method:'enumerate'},
+		function() {
+			var pos = sample(positionDist);
+			return {
+				x: Math.round(pos.x/10),
+				y: Math.round(pos.y/10)
+			}
+		}
+	);
+	map(function(x) {
+		display(
+			map(function(y) {
+				var pos = {x: x, y: y};
+				return Math.round(Math.exp(discretizedLocation.score(pos))*10)/10;
+			}, robot.range(-10, 10))
+		);
+	}, robot.range(-10, 10));
+
+	display(discretizedLocation.support());
+};
+
 var getLeftDistance = robot.getLeftDistance;
 var getRightDistance = robot.getRightDistance;
 var secPerFullTurn = 8.75;
 var turnPerSec = secPerFullTurn / (2*Math.PI);
+var cmPerSec = 8;
 
 var updatePosition = function(position, robotCommand, delay) {
 	if (robotCommand=='moveForward') {
 		return {
-			x: Math.round((position.x + Math.cos(position.theta))*100)/100,
-			y: Math.round((position.y + Math.sin(position.theta))*100)/100,
+			x: Math.round((position.x + Math.cos(position.theta)*delay*cmPerSec)*100)/100,
+			y: Math.round((position.y + Math.sin(position.theta)*delay*cmPerSec)*100)/100,
 			theta: Math.round(position.theta*100)/100
 		}
 	} else if (robotCommand=='moveReverse') {
 		return {
-			x: Math.round((position.x + Math.cos(position.theta))*100)/100,
-			y: Math.round((position.y + Math.sin(position.theta))*100)/100,
+			x: Math.round((position.x + Math.cos(position.theta)*delay*cmPerSec)*100)/100,
+			y: Math.round((position.y + Math.sin(position.theta)*delay*cmPerSec)*100)/100,
 			theta: Math.round(position.theta*100)/100
 		}
 	} else if (robotCommand=='turnLeft') {
@@ -40,28 +64,34 @@ var updatePosition = function(position, robotCommand, delay) {
 	}
 }
 
+var robotCommandPrior = function() {
+		categorical(
+			[2,1,1,1,.5], // weights on possible commands
+			['moveForward',
+			'turnRight',
+			'turnLeft',
+			'moveReverse',
+			'stop'
+		]);
+}
+
+
 var initialPosDist = Infer({method: 'enumerate'}, function() {return {x:0, y:0, theta:0}});
 
-var move = function(n, positionDist) {
+var autonomous = function(positionDist) {
 	var positionDist = positionDist?positionDist:initialPosDist;
 	var ldistance = getLeftDistance();
 	var rdistance = getRightDistance();
 
 
-	var marginalCommandsDist = Infer(
-		{method: 'enumerate', samples: 1},
+	var commands = sample(Infer(
+		{method: 'enumerate'},
 		function() {
 			var position = sample(positionDist);
+			var robotCommand = robotCommandPrior();
 
 			// sample robot commands
 			var delay = (randomInteger(10)+1)/10;
-			var robotCommand = uniformDraw([
-				'moveForward',
-				'turnRight',
-				'turnLeft',
-				'moveReverse',
-				'stop'
-			]);
 
 			if(ldistance > 10 | rdistance < 10) {
 				condition(robotCommand=='moveReverse');
@@ -73,19 +103,28 @@ var move = function(n, positionDist) {
 			// predict new position
 			var newpos = updatePosition(position, robotCommand, delay);
 			
-			factor(-Math.abs(newpos.x));
-			factor(-Math.abs(newpos.y));
+			// factor(-Math.abs(newpos.x));
+			// factor(-Math.abs(newpos.y));
 
-			return [robotCommand, delay, newpos];
+			return [robotCommand, delay];
 		}
-	);
-
-	var commands = sample(marginalCommandsDist);
-	var newPositionDist = Infer({method:'enumerate'}, function() {return sample(marginalCommandsDist)[2]});
-	display(newPositionDist);
+	));
 
 	var robotCommand = commands[0];
 	var delay = commands[1];
+
+	var newPositionDist = Infer(
+		{method:'enumerate'},
+		function() {
+			var currentPosition = sample(positionDist);
+			var nextPosition = updatePosition(currentPosition, robotCommand, delay);
+			return nextPosition;
+		}
+	);
+
+	printLocationEstimate(newPositionDist);
+	// display(sample(newPositionDist));
+
 	console.log(robotCommand);
 	console.log(delay);
 	console.log("getLeftDistance: " + ldistance);
@@ -97,10 +136,13 @@ var move = function(n, positionDist) {
 	robotMovement(delay);
 
 	// continue
-	move(n-1, newPositionDist);
+	autonomous(newPositionDist);
 };
 
-move(20);
+autonomous();
+
+// var moveForward = robot.moveForward;
+// moveForward(1);
 
 // var turnRight = robot.turnRight;
 // turnRight(8.75);
@@ -120,4 +162,4 @@ stop();
 // moveForward();
 // display('moveForward');
 
-"finished";
+// "finished";
