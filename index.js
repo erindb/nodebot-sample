@@ -18,7 +18,7 @@ var board = new five.Board({
 board.on('ready', function () {
     var speed, commands, motors;
     motors = {
-        a: new five.Motor( // right wheel motor
+        right: new five.Motor( // right wheel motor
             // [3, 5]
             {
                 pins: {
@@ -28,7 +28,7 @@ board.on('ready', function () {
                 invertPWM: true
             }
         ),
-        b: new five.Motor( // left wheel motor
+        left: new five.Motor( // left wheel motor
             //[9, 10]
             {
                 pins: {
@@ -38,6 +38,8 @@ board.on('ready', function () {
                 invertPWM: true
             }
         )
+        // 6, 7 are the right sensor
+        // 11, 12 are the left sensor
     };
 
     commands = null;
@@ -46,8 +48,8 @@ board.on('ready', function () {
     io.on('connection', function (socket) {
         socket.on('stop', function (data) {
             console.log('robot recieved stop signal')
-            motors.a.stop();
-            motors.b.stop();
+            motors.right.stop();
+            motors.left.stop();
             socket.emit('done', data);
         });
 
@@ -55,43 +57,43 @@ board.on('ready', function () {
             console.log(data);
             console.log('robot recieved start signal')
             speed = 150;
-            motors.a.fwd(speed);
-            motors.b.fwd(speed);
+            motors.right.fwd(speed);
+            motors.left.fwd(speed);
             socket.emit('done', data);
         });
 
         socket.on('reverse', function (data) {
             console.log('robot recieved reverse signal')
             speed = 150;
-            motors.a.rev(speed);
-            motors.b.rev(speed);
+            motors.right.rev(speed);
+            motors.left.rev(speed);
             socket.emit('done', data);
         });
 
         socket.on('left', function (data) {
             console.log('robot recieved left signal')
-            var aSpeed = 150;
-            var bSpeed = 150;
-            motors.a.fwd(aSpeed);
-            motors.b.rev(bSpeed);
+            var rightSpeed = 150;
+            var leftSpeed = 150;
+            motors.right.fwd(rightSpeed);
+            motors.left.rev(leftSpeed);
             socket.emit('done', data);
         });
 
         socket.on('right', function (data) {
             console.log('robot recieved right signal')
-            var aSpeed = 150;
-            var bSpeed = 150;
-            motors.a.rev(aSpeed);
-            motors.b.fwd(bSpeed);
+            var rightSpeed = 150;
+            var leftSpeed = 150;
+            motors.right.rev(rightSpeed);
+            motors.left.fwd(leftSpeed);
             socket.emit('done', data);
         });
 
         socket.on('reverse-right', function (data) {
             console.log('robot recieved reverse-right signal')
-            var aSpeed = 50;
-            var bSpeed = 220;
-            motors.a.fwd(speed);
-            motors.b.rev(speed);
+            var rightSpeed = 50;
+            var leftSpeed = 220;
+            motors.right.fwd(rightSpeed);
+            motors.left.rev(leftSpeed);
             socket.emit('done', data);
         });
     });
