@@ -1,26 +1,39 @@
 display('start');
 
-var socket = robot.connect();
+var connect = robot.connect;
+connect();
 
-var move = function() {
-	var delay = randomInteger(10)+1;
-	var direction = uniformDraw([
-			'moveForward',
-			'turnRight',
-			'turnLeft',
-			'moveReverse',
-			'stop'
-		])
-	display(direction + ' for ' + delay + 's');
-	var nextMove = (robot[direction])(socket);
-	robot.sleep(1);
-	return "finished";
+// var autonomous = robot.autonomous;
 
-};
+// var move = function() {
+// 	var delay = randomInteger(10)+1;
+// 	var direction = uniformDraw([
+// 			'moveForward',
+// 			'turnRight',
+// 			'turnLeft',
+// 			'moveReverse',
+// 			'stop'
+// 		])
+// 	display(direction + ' for ' + delay + 's');
+// 	var nextMove = (robot[direction])(socket);
+// 	robot.sleep(1);
+// 	return "finished";
 
-move();
-move();
-move();
-move();
+// };
+
+// move();
+// move();
+// move();
+// move();
+
+display('connected');
+var moveForward = robot.moveForward;
+display('moveForward defined');
+moveForward();
+display('moveForward');
+moveForward();
+display('moveForward');
+moveForward();
+display('moveForward');
 
 "finished";

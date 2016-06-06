@@ -50,9 +50,11 @@ board.on('ready', function () {
         });
 
         socket.on('start', function () {
+            console.log('hi')
             speed = 150;
             motors.a.fwd(speed);
             motors.b.fwd(speed);
+            socket.emit('done');
         });
 
         socket.on('reverse', function () {
