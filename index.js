@@ -18,7 +18,7 @@ var board = new five.Board({
 board.on('ready', function () {
     var speed, commands, motors;
     motors = {
-        a: new five.Motor(
+        a: new five.Motor( // right wheel motor
             // [3, 5]
             {
                 pins: {
@@ -28,7 +28,7 @@ board.on('ready', function () {
                 invertPWM: true
             }
         ),
-        b: new five.Motor(
+        b: new five.Motor( // left wheel motor
             //[9, 10]
             {
                 pins: {
@@ -73,6 +73,13 @@ board.on('ready', function () {
             var bSpeed = 220;
             motors.a.rev(aSpeed);
             motors.b.fwd(bSpeed);
+        });
+
+        socket.on('reverse-right', function () {
+            var aSpeed = 50;
+            var bSpeed = 220;
+            motors.a.fwd(speed);
+            motors.b.rev(speed);
         });
     });
 });
