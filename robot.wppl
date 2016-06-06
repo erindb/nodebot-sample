@@ -5,26 +5,36 @@ display('start');
 var connect = robot.connect;
 connect();
 
-var printMap = function() {
-
+var printLocationEstimate = function(positionDist) {
+	var discretizedLocation = Infer(
+		{method:'enumerate'},
+		function() {
+			var pos = sample(positionDist);
+			return {
+				x: Math.round(pos.x*100)/100,
+				y: Math.round(pos.y*100)/100
+			}
+		}
+	);
 };
 
 var getLeftDistance = robot.getLeftDistance;
 var getRightDistance = robot.getRightDistance;
 var secPerFullTurn = 8.75;
 var turnPerSec = secPerFullTurn / (2*Math.PI);
+var cmPerSec = 8;
 
 var updatePosition = function(position, robotCommand, delay) {
 	if (robotCommand=='moveForward') {
 		return {
-			x: Math.round((position.x + Math.cos(position.theta))*100)/100,
-			y: Math.round((position.y + Math.sin(position.theta))*100)/100,
+			x: Math.round((position.x + Math.cos(position.theta)*delay*cmPerSec)*100)/100,
+			y: Math.round((position.y + Math.sin(position.theta)*delay*cmPerSec)*100)/100,
 			theta: Math.round(position.theta*100)/100
 		}
 	} else if (robotCommand=='moveReverse') {
 		return {
-			x: Math.round((position.x + Math.cos(position.theta))*100)/100,
-			y: Math.round((position.y + Math.sin(position.theta))*100)/100,
+			x: Math.round((position.x + Math.cos(position.theta)*delay*cmPerSec)*100)/100,
+			y: Math.round((position.y + Math.sin(position.theta)*delay*cmPerSec)*100)/100,
 			theta: Math.round(position.theta*100)/100
 		}
 	} else if (robotCommand=='turnLeft') {
@@ -46,7 +56,7 @@ var updatePosition = function(position, robotCommand, delay) {
 
 var initialPosDist = Infer({method: 'enumerate'}, function() {return {x:0, y:0, theta:0}});
 
-var autonomous = function(n, positionDist) {
+var autonomous = function(positionDist) {
 	var positionDist = positionDist?positionDist:initialPosDist;
 	var ldistance = getLeftDistance();
 	var rdistance = getRightDistance();
@@ -77,8 +87,8 @@ var autonomous = function(n, positionDist) {
 			// predict new position
 			var newpos = updatePosition(position, robotCommand, delay);
 			
-			factor(-Math.abs(newpos.x));
-			factor(-Math.abs(newpos.y));
+			// factor(-Math.abs(newpos.x));
+			// factor(-Math.abs(newpos.y));
 
 			return [robotCommand, delay];
 		}
@@ -96,7 +106,8 @@ var autonomous = function(n, positionDist) {
 		}
 	);
 
-	display(newPositionDist);
+	printLocationEstimate(newPositionDist);
+	// display(sample(newPositionDist));
 
 	console.log(robotCommand);
 	console.log(delay);
@@ -109,12 +120,13 @@ var autonomous = function(n, positionDist) {
 	robotMovement(delay);
 
 	// continue
-	autonomous(n-1, newPositionDist);
+	autonomous(newPositionDist);
 };
 
-// autonomous(20);
+autonomous();
 
-
+// var moveForward = robot.moveForward;
+// moveForward(1);
 
 // var turnRight = robot.turnRight;
 // turnRight(8.75);
