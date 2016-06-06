@@ -44,44 +44,55 @@ board.on('ready', function () {
     speed = 255;
 
     io.on('connection', function (socket) {
-        socket.on('stop', function () {
+        socket.on('stop', function (data) {
+            console.log('robot recieved stop signal')
             motors.a.stop();
             motors.b.stop();
+            socket.emit('done', data);
         });
 
-        socket.on('start', function () {
-            console.log('hi')
+        socket.on('start', function (data) {
+            console.log(data);
+            console.log('robot recieved start signal')
             speed = 150;
             motors.a.fwd(speed);
             motors.b.fwd(speed);
-            socket.emit('done');
+            socket.emit('done', data);
         });
 
-        socket.on('reverse', function () {
+        socket.on('reverse', function (data) {
+            console.log('robot recieved reverse signal')
             speed = 120;
             motors.a.rev(speed);
             motors.b.rev(speed);
+            socket.emit('done', data);
         });
 
-        socket.on('left', function () {
+        socket.on('left', function (data) {
+            console.log('robot recieved left signal')
             var aSpeed = 220;
             var bSpeed = 50;
             motors.a.fwd(aSpeed);
             motors.b.rev(bSpeed);
+            socket.emit('done', data);
         });
 
-        socket.on('right', function () {
+        socket.on('right', function (data) {
+            console.log('robot recieved right signal')
             var aSpeed = 50;
             var bSpeed = 220;
             motors.a.rev(aSpeed);
             motors.b.fwd(bSpeed);
+            socket.emit('done', data);
         });
 
-        socket.on('reverse-right', function () {
+        socket.on('reverse-right', function (data) {
+            console.log('robot recieved reverse-right signal')
             var aSpeed = 50;
             var bSpeed = 220;
             motors.a.fwd(speed);
             motors.b.rev(speed);
+            socket.emit('done', data);
         });
     });
 });

@@ -3,37 +3,75 @@ display('start');
 var connect = robot.connect;
 connect();
 
-// var autonomous = robot.autonomous;
+var secPerFullTurn = 10;
+var turnPerSec = secPerFullTurn / (2*Math.PI);
 
-// var move = function() {
-// 	var delay = randomInteger(10)+1;
-// 	var direction = uniformDraw([
-// 			'moveForward',
-// 			'turnRight',
-// 			'turnLeft',
-// 			'moveReverse',
-// 			'stop'
-// 		])
-// 	display(direction + ' for ' + delay + 's');
-// 	var nextMove = (robot[direction])(socket);
-// 	robot.sleep(1);
-// 	return "finished";
+var updatePosition = function(position, robotCommand, delay) {
+	if (robotCommand=='moveForward') {
+		return {
+			x: position.x + Math.cos(position.theta),
+			y: position.y + Math.sin(position.theta),
+			theta: position.theta
+		}
+	} else if (robotCommand=='moveReverse') {
+		return {
+			x: position.x + Math.cos(position.theta),
+			y: position.y + Math.sin(position.theta),
+			theta: position.theta
+		}
+	} else if (robotCommand=='turnLeft') {
+		return {
+			x: position.x,
+			y: position.y,
+			theta: position.theta + turnPerSec*delay;
+		}
+	} else if (robotCommand=='turnRight') {
+		return {
+			x: position.x,
+			y: position.y,
+			theta: position.theta - turnPerSec*delay;
+		}
+	} else {
+		return position;
+	}
+}
 
-// };
+var move = function(n, position) {
+	var position = position?position:{x:0, y:0, theta:0};
 
-// move();
-// move();
-// move();
-// move();
+	// sample robot commands
+	var delay = randomInteger(5)+1;
+	var robotCommand = uniformDraw([
+		'moveForward',
+		'turnRight',
+		'turnLeft',
+		'moveReverse',
+		'stop'
+	]);
 
-display('connected');
-var moveForward = robot.moveForward;
-display('moveForward defined');
-moveForward();
-display('moveForward');
-moveForward();
-display('moveForward');
-moveForward();
-display('moveForward');
+	// predict new position
+	var newpos = updatePosition(position, direction, delay);
+	console.log(newpos);
+
+	// actually move
+	display(direction + ' for ' + delay + 's');
+	var robotMovement = robot[direction];
+	robotMovement(delay);
+
+	// continue
+	move(n-1, newx, newy, newtheta);
+};
+
+move(20);
+
+// display('connected');
+// var moveForward = robot.moveForward;
+// display('moveForward defined');
+// moveForward();
+// display('moveForward');
+// moveForward();
+// display('moveForward');
+// moveForward();
+// display('moveForward');
 
 "finished";
