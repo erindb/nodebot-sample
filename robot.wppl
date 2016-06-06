@@ -1,11 +1,17 @@
+// webppl robot.wppl --require robot
+
 display('start');
 
 var connect = robot.connect;
 connect();
 
+<<<<<<< Updated upstream
 var getLeftDistance = robot.getLeftDistance;
 var getRightDistance = robot.getRightDistance;
 
+=======
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
 var secPerFullTurn = 8.75;
 var turnPerSec = secPerFullTurn / (2*Math.PI);
 
@@ -39,15 +45,19 @@ var updatePosition = function(position, robotCommand, delay) {
 	}
 }
 
-var move = function(n, position) {
-	var position = position?position:{x:0, y:0, theta:0};
+Infer({method: 'enumerate'}, function() {return {x:0, y:0, theta:0};});
+
+var move = function(n, positionDist) {
+	var positionDist = positionDist?positionDist:initialPosDist;
 	var ldistance = getLeftDistance();
 	var rdistance = getRightDistance();
 
 
-	var commands = sample(Infer(
-		{method: 'rejection', samples: 1},
+	var marginalCommandsDist = Infer(
+		{method: 'enumerate', samples: 1},
 		function() {
+			var position = sample(positionDist);
+
 			// sample robot commands
 			var delay = (randomInteger(10)+1)/10;
 			var robotCommand = uniformDraw([
@@ -73,14 +83,15 @@ var move = function(n, position) {
 
 			return [robotCommand, delay, newpos];
 		}
-	));
+	);
+
+	var commands = sample(marginalCommandsDist);
+	var newPositionDist = Infer({method:'enumerate'}, function() {return sample(marginalCommandsDist)[2]});
 
 	var robotCommand = commands[0];
 	var delay = commands[1];
-	var newpos = commands[2]
 	console.log(robotCommand);
 	console.log(delay);
-	console.log(newpos);
 	console.log("getLeftDistance: " + ldistance);
 	console.log("getRightDistance: " + rdistance);
 
@@ -90,7 +101,7 @@ var move = function(n, position) {
 	robotMovement(delay);
 
 	// continue
-	move(n-1, newpos);
+	move(n-1, newPositionDist);
 };
 
 move(20);
@@ -103,6 +114,30 @@ move(20);
 var stop = robot.stop;
 stop();
 
+=======
+// var autonomous = robot.autonomous;
+
+var move = function() {
+	var delay = randomInteger(10)+1;
+	var direction = uniformDraw([
+			'moveForward',
+			'turnRight',
+			'turnLeft',
+			'moveReverse',
+			'stop'
+		])
+	display(direction + ' for ' + delay + 's');
+	var nextMove = (robot[direction])();
+	robot.sleep(1);
+	return "finished";
+
+};
+
+move();
+move();
+move();
+move();
+>>>>>>> Stashed changes
 
 // display('connected');
 // var moveForward = robot.moveForward;
