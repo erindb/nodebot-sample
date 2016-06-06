@@ -5,47 +5,42 @@ display('start');
 var connect = robot.connect;
 connect();
 
-<<<<<<< Updated upstream
 var getLeftDistance = robot.getLeftDistance;
 var getRightDistance = robot.getRightDistance;
-
-=======
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
 var secPerFullTurn = 8.75;
 var turnPerSec = secPerFullTurn / (2*Math.PI);
 
 var updatePosition = function(position, robotCommand, delay) {
 	if (robotCommand=='moveForward') {
 		return {
-			x: position.x + Math.cos(position.theta),
-			y: position.y + Math.sin(position.theta),
-			theta: position.theta
+			x: Math.round((position.x + Math.cos(position.theta))*100)/100,
+			y: Math.round((position.y + Math.sin(position.theta))*100)/100,
+			theta: Math.round(position.theta*100)/100
 		}
 	} else if (robotCommand=='moveReverse') {
 		return {
-			x: position.x + Math.cos(position.theta),
-			y: position.y + Math.sin(position.theta),
-			theta: position.theta
+			x: Math.round((position.x + Math.cos(position.theta))*100)/100,
+			y: Math.round((position.y + Math.sin(position.theta))*100)/100,
+			theta: Math.round(position.theta*100)/100
 		}
 	} else if (robotCommand=='turnLeft') {
 		return {
 			x: position.x,
 			y: position.y,
-			theta: position.theta + turnPerSec*delay
+			theta: Math.round(((position.theta + turnPerSec*delay) % (2*Math.PI))*100)/100
 		}
 	} else if (robotCommand=='turnRight') {
 		return {
 			x: position.x,
 			y: position.y,
-			theta: position.theta - turnPerSec*delay
+			theta: Math.round(((position.theta - turnPerSec*delay) % (2*Math.PI))*100)/100
 		}
 	} else {
 		return position;
 	}
 }
 
-Infer({method: 'enumerate'}, function() {return {x:0, y:0, theta:0};});
+var initialPosDist = Infer({method: 'enumerate'}, function() {return {x:0, y:0, theta:0}});
 
 var move = function(n, positionDist) {
 	var positionDist = positionDist?positionDist:initialPosDist;
@@ -87,6 +82,7 @@ var move = function(n, positionDist) {
 
 	var commands = sample(marginalCommandsDist);
 	var newPositionDist = Infer({method:'enumerate'}, function() {return sample(marginalCommandsDist)[2]});
+	display(newPositionDist);
 
 	var robotCommand = commands[0];
 	var delay = commands[1];
@@ -113,31 +109,6 @@ move(20);
 
 var stop = robot.stop;
 stop();
-
-=======
-// var autonomous = robot.autonomous;
-
-var move = function() {
-	var delay = randomInteger(10)+1;
-	var direction = uniformDraw([
-			'moveForward',
-			'turnRight',
-			'turnLeft',
-			'moveReverse',
-			'stop'
-		])
-	display(direction + ' for ' + delay + 's');
-	var nextMove = (robot[direction])();
-	robot.sleep(1);
-	return "finished";
-
-};
-
-move();
-move();
-move();
-move();
->>>>>>> Stashed changes
 
 // display('connected');
 // var moveForward = robot.moveForward;
