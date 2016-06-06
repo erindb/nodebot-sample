@@ -44,9 +44,21 @@ var updatePosition = function(position, robotCommand, delay) {
 	}
 }
 
+var robotCommandPrior = function() {
+		categorical(
+			[2,1,1,1,.5], // weights on possible commands
+			['moveForward',
+			'turnRight',
+			'turnLeft',
+			'moveReverse',
+			'stop'
+		]);
+}
+
+
 var initialPosDist = Infer({method: 'enumerate'}, function() {return {x:0, y:0, theta:0}});
 
-var autonomous = function(n, positionDist) {
+var autonomous = function(positionDist) {
 	var positionDist = positionDist?positionDist:initialPosDist;
 	var ldistance = getLeftDistance();
 	var rdistance = getRightDistance();
@@ -56,16 +68,10 @@ var autonomous = function(n, positionDist) {
 		{method: 'enumerate'},
 		function() {
 			var position = sample(positionDist);
+			var robotCommand = robotCommandPrior();
 
 			// sample robot commands
 			var delay = (randomInteger(10)+1)/10;
-			var robotCommand = uniformDraw([
-				'moveForward',
-				'turnRight',
-				'turnLeft',
-				'moveReverse',
-				'stop'
-			]);
 
 			if(ldistance > 10 | rdistance < 10) {
 				condition(robotCommand=='moveReverse');
@@ -77,8 +83,8 @@ var autonomous = function(n, positionDist) {
 			// predict new position
 			var newpos = updatePosition(position, robotCommand, delay);
 			
-			factor(-Math.abs(newpos.x));
-			factor(-Math.abs(newpos.y));
+			// factor(-Math.abs(newpos.x));
+			// factor(-Math.abs(newpos.y));
 
 			return [robotCommand, delay];
 		}
@@ -109,10 +115,10 @@ var autonomous = function(n, positionDist) {
 	robotMovement(delay);
 
 	// continue
-	autonomous(n-1, newPositionDist);
+	autonomous(newPositionDist);
 };
 
-// autonomous(20);
+autonomous();
 
 
 
@@ -134,4 +140,4 @@ stop();
 // moveForward();
 // display('moveForward');
 
-"finished";
+// "finished";
