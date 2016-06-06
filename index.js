@@ -58,21 +58,21 @@ board.on('ready', function () {
         });
 
         socket.on('reverse', function () {
-            speed = 120;
+            speed = 150;
             motors.a.rev(speed);
             motors.b.rev(speed);
         });
 
         socket.on('left', function () {
-            var aSpeed = 220;
-            var bSpeed = 50;
+            var aSpeed = 150;
+            var bSpeed = 150;
             motors.a.fwd(aSpeed);
             motors.b.rev(bSpeed);
         });
 
         socket.on('right', function () {
-            var aSpeed = 50;
-            var bSpeed = 220;
+            var aSpeed = 150;
+            var bSpeed = 150;
             motors.a.rev(aSpeed);
             motors.b.fwd(bSpeed);
         });
