@@ -1,5 +1,26 @@
 display('start');
 
-robot.moveForward();
+var socket = robot.connect();
+
+var move = function() {
+	var delay = randomInteger(10)+1;
+	var direction = uniformDraw([
+			'moveForward',
+			'turnRight',
+			'turnLeft',
+			'moveReverse',
+			'stop'
+		])
+	display(direction + ' for ' + delay + 's');
+	var nextMove = (robot[direction])(socket);
+	robot.sleep(1);
+	return "finished";
+
+};
+
+move();
+move();
+move();
+move();
 
 "finished";
