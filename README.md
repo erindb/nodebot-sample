@@ -6,3 +6,10 @@
 hbridge pin labels from: http://www.ti.com/lit/ds/symlink/sn754410.pdf
 loosely following this wiring diagram:
 https://github.com/rwaldron/johnny-five/blob/master/docs/motor-hbridge.md
+
+
+
+use PingFirmata
+http://johnny-five.io/api/proximity/#pingfirmata
+Source code: 
+https://gist.githubusercontent.com/rwaldron/0519fcd5c48bfe43b827/raw/f17fb09b92ed04722953823d9416649ff380c35b/PingFirmata.ino
