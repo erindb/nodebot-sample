@@ -3,6 +3,9 @@ display('start');
 var connect = robot.connect;
 connect();
 
+var getLeftDistance = robot.getLeftDistance;
+var getRightDistance = robot.getRightDistance;
+
 var secPerFullTurn = 8.75;
 var turnPerSec = secPerFullTurn / (2*Math.PI);
 
@@ -38,6 +41,9 @@ var updatePosition = function(position, robotCommand, delay) {
 
 var move = function(n, position) {
 	var position = position?position:{x:0, y:0, theta:0};
+	var ldistance = getLeftDistance();
+	var rdistance = getRightDistance();
+
 
 	var commands = sample(Infer(
 		{method: 'rejection', samples: 1},
@@ -51,6 +57,13 @@ var move = function(n, position) {
 				'moveReverse',
 				'stop'
 			]);
+
+			if(ldistance > 10 | rdistance < 10) {
+				condition(robotCommand=='moveReverse');
+				factor(delay); // want to move back longer
+			} else {
+				condition(robotCommand!='moveReverse');
+			}
 
 			// predict new position
 			var newpos = updatePosition(position, robotCommand, delay);
@@ -68,6 +81,8 @@ var move = function(n, position) {
 	console.log(robotCommand);
 	console.log(delay);
 	console.log(newpos);
+	console.log("getLeftDistance: " + ldistance);
+	console.log("getRightDistance: " + rdistance);
 
 	// actually move
 	display(robotCommand + ' for ' + delay + 's');
