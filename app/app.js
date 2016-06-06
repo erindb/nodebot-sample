@@ -24,9 +24,55 @@ function stop(){
     socket.emit('stop');
 }
 
+function getLeftDistance(s, k, a) {
+	socket.emit('get-left-distance');
+		    socket.on('done', function(leftDistance) {
+	    	socket.removeListener('done');
+	    	// sleep.usleep(seconds*1000000);
+			console.log('robot sent me back "left distance"' + leftDistance);
+			// var trampoline = k(s, leftDistance);
+			// while (trampoline){
+			// 	trampoline = trampoline();
+			// }
+		})
+}
+
+function getRightDistance(s, k, a) {
+		socket.emit('get-right-distance');
+	    socket.on('done', function(rightDistance) {
+	    	socket.removeListener('done');
+	    	// sleep.usleep(seconds*1000000);
+			console.log('robot sent me back "right distance"' + rightDistance);
+		})
+	}
+
 document.getElementById('forward').onclick = moveForward;
 document.getElementById('right').onclick = turnRight;
 document.getElementById('left').onclick = turnLeft;
 document.getElementById('reverse').onclick = moveReverse;
 document.getElementById('reverse-right').onclick = reverseRight;
+document.getElementById('getLeftDistance').onclick = getLeftDistance;
+document.getElementById('getRightDistance').onclick = getRightDistance;
 document.getElementById('stop').onclick = stop;
+
+
+mapCanvas = Raphael('map', 600, 600);
+mapHalfWidth = 600/2;
+// mapCanvas.image("https://web.stanford.edu/~dco/common/images/bob.jpeg", 100, 100, 100, 100);
+var currentX = 0;
+var currentY = 0;
+currentX_plot = currentX + mapHalfWidth;
+currentY_plot = currentY + mapHalfWidth;
+var circle = mapCanvas.circle(currentX_plot, currentY_plot, 10);
+
+
+
+
+
+
+
+
+
+
+
+
