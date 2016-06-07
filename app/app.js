@@ -55,8 +55,8 @@ function getPosition() {
 	}
 
 function updatePosition(x, y) {
-	mapCanvas.clear();
-	rect1 = mapCanvas.rect(0,0,600,600).attr({fill: "white"});
+	// mapCanvas.clear();
+	rect1 = mapCanvas.rect(0,0,600,600).attr({fill: "white", 'fill-opacity': 0.1});
 	currentX_plot = x*3 + mapHalfWidth;
 	currentY_plot = y*3 + mapHalfWidth;
 	circle = mapCanvas.circle(currentX_plot, currentY_plot, 10).attr({fill: "red"});
@@ -82,8 +82,20 @@ currentX_plot = currentX + mapHalfWidth;
 currentY_plot = currentY + mapHalfWidth;
 var circle = mapCanvas.circle(currentX_plot, currentY_plot, 10).attr({fill: "red"});
 
+rect1 = mapCanvas.rect(0,0,600,600).attr({fill: "white", 'fill-opacity': 1});
 updatePosition(currentX, currentY);
 
+
+
+
+    myInterval = setInterval(function() {
+      getPosition();
+    }, 500);
+
+    setTimeout(function() {
+      clearInterval(myInterval);
+      mapCanvas.text(200, 200, "Demo Timed Out.").attr({ "font-size": 24 });
+    }, (120)*1000 ); // timeout of 120s
 
 
 
