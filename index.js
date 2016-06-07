@@ -17,7 +17,7 @@ var board = new five.Board({
 
 board.on('ready', function () {
     var speed, commands, motors, sensors;
-    var leftDistance, rightDistance;
+    var leftDistance, rightDistance, position;
     motors = {
         right: new five.Motor( // right wheel motor
             // [3, 5]
@@ -60,6 +60,7 @@ board.on('ready', function () {
     speed = 255;
     leftDistance = null;
     rightDistance = null;
+    position = 0;
 
     io.on('connection', function (socket) {
 
@@ -82,6 +83,17 @@ board.on('ready', function () {
         socket.on('get-right-distance', function () {
             console.log('robot recieved query for right distance');
             socket.emit('done', rightDistance);
+        });
+
+        socket.on('sendPositionForMapping', function (data) {
+            console.log('robot recieved update of position');
+            position = data;
+            socket.emit('done');
+        });
+
+        socket.on('getPositionForMapping', function () {
+            console.log('robot recieved query for position');
+            socket.emit('done', position);
         });
 
         socket.on('stop', function (data) {

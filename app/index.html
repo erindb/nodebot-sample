@@ -7,11 +7,11 @@
     <link rel="stylesheet" href="style.css">
 
     <style type="text/css">
-    body{
+    html, body{
     width: 100%;
     height: 100%;
     background-color: #666666;
-    overflow: hidden;
+    overflow: scroll;
     }
     </style>
 </head>
@@ -20,19 +20,25 @@
 
 
 
-
-<div class="container">
+<center>
+<!-- <div class="container"> -->
+<div style="width: 300px;">
     <i class="fa fa-angle-up" id="forward"></i>
     <i class="fa fa-angle-left" id="left"></i>
     <i class="fa fa-angle-down" id="reverse"></i>
     <i class="fa fa-angle-right" id="right"></i>
     <i id="reverse-right">reverseRight</i>
     <i id="getLeftDistance">getLeftDistance</i>
+    <br>
     <i id="getRightDistance">getRightDistance</i>
+    <br>
+    <i id="getPosition">getPosition</i>
     <i class="fa stop" id="stop">STOP</i>
+    <br>
 </div>
+<!-- </div> -->
+<br><br>
 
-<center>
 <div id="map" width="600" height="600"> </div>
 </center>
 
