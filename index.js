@@ -61,51 +61,63 @@ board.on('ready', function () {
     leftDistance = null;
     rightDistance = null;
     position = {x: 0, y: 0};
+    aMap = [];
 
     io.on('connection', function (socket) {
 
         sensors.right.on("data", function() {
             // console.log("right, inches: ", this.inches);
-            console.log("right, cm: ", this.cm);
+            // console.log("right, cm: ", this.cm);
             rightDistance = this.cm;
         });
         sensors.left.on("data", function() {
             // console.log("left, inches: ", this.inches);
-            console.log("left, cm: ", this.cm);
+            // console.log("left, cm: ", this.cm);
             leftDistance = this.cm;
         });
 
         socket.on('get-left-distance', function () {
-            console.log('robot recieved query for left distance');
+            // console.log('robot recieved query for left distance');
             socket.emit('done', leftDistance);
         });
 
         socket.on('get-right-distance', function () {
-            console.log('robot recieved query for right distance');
+            // console.log('robot recieved query for right distance');
             socket.emit('done', rightDistance);
         });
 
+        socket.on('send-map', function (data) {
+            // console.log('robot recieved update of position');
+            aMap = data;
+            socket.emit('done', aMap);
+        });
+
+        socket.on('get-map', function () {
+            // console.log('robot recieved query for position');
+            socket.emit('map-gotten', aMap);
+        });
+
         socket.on('send-position', function (data) {
-            console.log('robot recieved update of position');
+            // console.log('robot recieved update of position');
             position = data;
             socket.emit('done', position);
         });
 
         socket.on('get-position', function () {
-            console.log('robot recieved query for position');
+            // console.log('robot recieved query for position');
             socket.emit('done', position);
         });
 
         socket.on('stop', function (data) {
-            console.log('robot recieved stop signal');
+            // console.log('robot recieved stop signal');
             motors.right.stop();
             motors.left.stop();
             socket.emit('done', data);
         });
 
         socket.on('start', function (data) {
-            console.log(data);
-            console.log('robot recieved start signal');
+            // console.log(data);
+            // console.log('robot recieved start signal');
             speed = 150;
             motors.right.fwd(speed);
             motors.left.fwd(speed);
@@ -113,7 +125,7 @@ board.on('ready', function () {
         });
 
         socket.on('reverse', function (data) {
-            console.log('robot recieved reverse signal');
+            // console.log('robot recieved reverse signal');
             speed = 150;
             motors.right.rev(speed);
             motors.left.rev(speed);
@@ -121,7 +133,7 @@ board.on('ready', function () {
         });
 
         socket.on('left', function (data) {
-            console.log('robot recieved left signal');
+            // console.log('robot recieved left signal');
             var rightSpeed = 150;
             var leftSpeed = 150;
             motors.right.fwd(rightSpeed);
@@ -130,7 +142,7 @@ board.on('ready', function () {
         });
 
         socket.on('right', function (data) {
-            console.log('robot recieved right signal');
+            // console.log('robot recieved right signal');
             var rightSpeed = 150;
             var leftSpeed = 150;
             motors.right.rev(rightSpeed);
@@ -139,7 +151,7 @@ board.on('ready', function () {
         });
 
         socket.on('reverse-right', function (data) {
-            console.log('robot recieved reverse-right signal');
+            // console.log('robot recieved reverse-right signal');
             var rightSpeed = 50;
             var leftSpeed = 220;
             motors.right.fwd(rightSpeed);

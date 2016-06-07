@@ -45,21 +45,53 @@ function getRightDistance(s, k, a) {
 		})
 	}
 
-function getPosition() {
-		socket.emit('get-position');
-	    socket.on('done', function(position) {
-	    	socket.removeListener('done');
-			console.log('robot sent me back "position" ' + position.x + ',' + position.y);
-			updatePosition(position.x, position.y);
+function getMap() {
+		socket.emit('get-map');
+	    socket.on('map-gotten', function(mappyMap) {
+	    	socket.removeListener('map-gotten');
+			// console.log('robot sent me back "position" ' + position.x + ',' + position.y);
+			// for pos in
+			updateMap(mappyMap);
 		})
 	}
 
-function updatePosition(x, y) {
+function getPosition() {
+		socket.emit('get-position');
+	    socket.on('done', function(positions) {
+	    	socket.removeListener('done');
+			// console.log('robot sent me back "position" ' + position.x + ',' + position.y);
+			// for pos in
+			updatePosition(positions);
+		})
+	}
+
+var scale = 3;
+
+function updateMap(mappyMap) {
 	// mapCanvas.clear();
-	rect1 = mapCanvas.rect(0,0,600,600).attr({fill: "white", 'fill-opacity': 0.1});
-	currentX_plot = x*3 + mapHalfWidth;
-	currentY_plot = y*3 + mapHalfWidth;
-	circle = mapCanvas.circle(currentX_plot, currentY_plot, 10).attr({fill: "red"});
+
+	for (var i=0; i<mappyMap.length; i++) {
+		objectLocation = mappyMap[i];
+		console.log(objectLocation);
+		objectCircle = mapCanvas.circle(
+			objectLocation.x*scale + mapHalfWidth,
+			600 - (objectLocation.y*scale + mapHalfWidth),
+			10).attr({fill: 'blue'});
+	}
+}
+
+function updatePosition(positions) {
+	// mapCanvas.clear();
+
+	for (var i=0; i<positions.length; i++) {
+		position = positions[i];
+		x = position.x;
+		y = position.y;
+		rect1 = mapCanvas.rect(0,0,600,600).attr({fill: "white", 'fill-opacity': 0.1});
+		currentX_plot = x*scale + mapHalfWidth;
+		currentY_plot = 600 - (y*scale + mapHalfWidth);
+		circle = mapCanvas.circle(currentX_plot, currentY_plot, 10).attr({fill: "red"});
+	}
 }
 
 document.getElementById('forward').onclick = moveForward;
@@ -85,11 +117,12 @@ var circle = mapCanvas.circle(currentX_plot, currentY_plot, 10).attr({fill: "red
 rect1 = mapCanvas.rect(0,0,600,600).attr({fill: "white", 'fill-opacity': 1});
 updatePosition(currentX, currentY);
 
-
+var aMap = [];
 
 
     myInterval = setInterval(function() {
       getPosition();
+      getMap();
     }, 500);
 
     setTimeout(function() {

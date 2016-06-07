@@ -5,67 +5,67 @@ display('start');
 var connect = robot.connect;
 var stop = robot.stop;
 var sendPosition = robot.sendPosition;
+var moveForward = robot.moveForward;
+var sendMap = robot.sendMap;
 
 connect();
 
 var printLocationEstimate = function(positionDist) {
-	// var discretizedLocation = Infer(
-	// 	{method:'enumerate'},
-	// 	function() {
-	// 		var pos = sample(positionDist);
-	// 		return {
-	// 			x: Math.round(pos.x/10),
-	// 			y: Math.round(pos.y/10)
-	// 		}
-	// 	}
-	// );
-	// map(function(x) {
-	// 	display(
-	// 		map(function(y) {
-	// 			var pos = {x: x, y: y};
-	// 			return (Math.round(Math.exp(discretizedLocation.score(pos))*100)/100).toFixed(2);
-	// 		}, robot.range(5, -5)).join(' ')
-	// 	);
-	// }, robot.range(-5, 5));
-	var pos = sample(positionDist);
-	sendPosition({x: pos.x, y: pos.y});
+	var xdist = Infer({method: 'enumerate'}, function() {return sample(positionDist).x;});
+	var ydist = Infer({method: 'enumerate'}, function() {return sample(positionDist).y;});
+	// console.log([{x: expectation(xdist), y: expectation(ydist)}]);
+	sendPosition([{x: expectation(xdist), y: expectation(ydist)}]);
+};
 
-	// display(discretizedLocation.support());
+var printObjectEstimate = function(aMap) {
+// 	var xdist = Infer({method: 'enumerate'}, function() {return sample(positionDist).x;});
+// 	var ydist = Infer({method: 'enumerate'}, function() {return sample(positionDist).y;});
+// 	console.log([{x: expectation(xdist), y: expectation(ydist)}]);
+// 	sendPosition([{x: expectation(xdist), y: expectation(ydist)}]);
+	// display(positionDist);
+	sendMap(aMap);
 };
 
 var getLeftDistance = robot.getLeftDistance;
 var getRightDistance = robot.getRightDistance;
 var secPerFullTurn = 8.75;
 var turnPerSec = secPerFullTurn / (2*Math.PI);
-var cmPerSec = 8;
-var xnoise = 3;
-var ynoise = 3;
-var thetanoise = 3;
+var secPerPaper = 3.75;
+// var secPerPaper = 9;
+var cmPerPaper = 27.94;
+var cmPerSec = cmPerPaper / secPerPaper;
+var xnoise = 1;
+var ynoise = 1;
+var thetanoise = 1;
+
+var myRound = function(number) {
+	return Math.round((number)*100)/100;
+}
 
 var updatePosition = function(position, robotCommand, delay) {
 	if (robotCommand=='moveForward') {
 		return {
-			x: Math.round((position.x + Math.cos(position.theta)*delay*cmPerSec)*100)/100,
-			y: Math.round((position.y + Math.sin(position.theta)*delay*cmPerSec)*100)/100,
-			theta: Math.round(position.theta*100)/100
+			x: myRound(position.x + Math.cos(position.theta)*delay*cmPerSec),
+			y: myRound(position.y + Math.sin(position.theta)*delay*cmPerSec),
+			theta: myRound(position.theta)
 		}
 	} else if (robotCommand=='moveReverse') {
 		return {
-			x: Math.round((position.x + Math.cos(position.theta)*delay*cmPerSec)*100)/100,
-			y: Math.round((position.y + Math.sin(position.theta)*delay*cmPerSec)*100)/100,
-			theta: Math.round(position.theta*100)/100
+			x: myRound(position.x - Math.cos(position.theta)*delay*cmPerSec),
+			y: myRound(position.y - Math.sin(position.theta)*delay*cmPerSec),
+			theta: myRound(position.theta)
 		}
 	} else if (robotCommand=='turnLeft') {
 		return {
-			x: position.x,
-			y: position.y,
-			theta: Math.round(((position.theta + turnPerSec*delay) % (2*Math.PI))*100)/100
+			x: myRound(position.x),
+			y: myRound(position.y),
+			theta: myRound((position.theta + turnPerSec*delay) % (2*Math.PI))
 		}
 	} else if (robotCommand=='turnRight') {
 		return {
-			x: position.x,
-			y: position.y,
-			theta: Math.round(((position.theta - turnPerSec*delay) % (2*Math.PI))*100)/100
+			x: myRound(position.x),
+			y: myRound(position.y),
+			theta: myRound((position.theta - turnPerSec*delay) % (2*Math.PI))
 		}
 	} else {
 		return position;
@@ -84,68 +84,90 @@ var robotCommandPrior = function() {
 		]);
 }
 
+var getObjectPosition = function(positionDist, ldistance, rdistance) {
+	var xdist = Infer({method: 'enumerate'}, function() {return sample(positionDist).x;});
+	var ydist = Infer({method: 'enumerate'}, function() {return sample(positionDist).y;});
+	var thetadist = Infer({method: 'enumerate'}, function() {return sample(positionDist).theta;});
+	var theta = expectation(thetadist);
+	var x = expectation(xdist);
+	var y = expectation(ydist)
+	return {
+		x: x + Math.cos(theta)*rdistance,
+		y: y + Math.sin(theta)*rdistance
+	}
+}
 
-var initialPosDist = Infer({method: 'enumerate'}, function() {return {x:0, y:0, theta:0}});
+var initialPosDist = Infer({method: 'enumerate'}, function() {return {x:0, y:0, theta: Math.PI/2}});
+var initialMap = [];
 
-var autonomous = function(positionDist) {
-	var positionDist = positionDist?positionDist:initialPosDist;
-	var ldistance = getLeftDistance();
-	var rdistance = getRightDistance();
+var autonomous = function(n, positionDist, currentMap) {
+	if (n==0) {
+		return "finished";
+	} else {
+		var positionDist = positionDist?positionDist:initialPosDist;
+		var currentMap = currentMap?currentMap:initialMap;
+		var ldistance = getLeftDistance();
+		var rdistance = getRightDistance();
 
-	printLocationEstimate(positionDist);
+		printLocationEstimate(positionDist);
+		var newMap = currentMap.concat([getObjectPosition(positionDist, ldistance, rdistance)]);
+		printObjectEstimate(newMap);
 
-	var commands = sample(Infer(
-		{method: 'enumerate'},
-		function() {
-			var position = sample(positionDist);
-			var robotCommand = robotCommandPrior();
+		var commands = sample(Infer(
+			{method: 'enumerate'},
+			function() {
+				var position = sample(positionDist);
+				var robotCommand = robotCommandPrior();
 
-			// sample robot commands
-			var delay = (randomInteger(10)+1)/10;
+				// sample robot commands
+				var delay = (randomInteger(10)+1)/10;
 
-			if(ldistance > 10 | rdistance < 10) {
-				condition(robotCommand=='moveReverse');
-				condition(delay==1);
-				// factor(delay); // want to move back longer
-			} else {
-				condition(robotCommand!='moveReverse');
+				if(ldistance > 10 | rdistance < 10) {
+					condition(robotCommand=='moveReverse');
+					condition(delay==1);
+					// factor(delay); // want to move back longer
+				} else {
+					condition(robotCommand!='moveReverse');
+				}
+
+				// predict new position
+				var newpos = updatePosition(position, robotCommand, delay);
+				
+				// factor(-Math.abs(newpos.x));
+				// factor(-Math.abs(newpos.y));
+
+				return [robotCommand, delay];
 			}
+		));
 
-			// predict new position
-			var newpos = updatePosition(position, robotCommand, delay);
-			
-			// factor(-Math.abs(newpos.x));
-			// factor(-Math.abs(newpos.y));
+		var robotCommand = commands[0];
+		var delay = commands[1];
 
-			return [robotCommand, delay];
-		}
-	));
+		var newPositionDist = Infer(
+			{method:'rejection', samples: 100},
+			function() {
+				var currentPosition = sample(positionDist);
+				var nextPosition = updatePosition(currentPosition, robotCommand, delay);
+				// return {
+				// 	x: gaussian(nextPosition.x, xnoise),
+				// 	y: gaussian(nextPosition.y, ynoise),
+				// 	theta: gaussian(nextPosition.theta, thetanoise)
+				// };
+				return nextPosition;
+			}
+		);
 
-	var robotCommand = commands[0];
-	var delay = commands[1];
+		var robotMovement = robot[robotCommand];
+		robotMovement(delay);
 
-	var newPositionDist = Infer(
-		{method:'MCMC', samples: 100},
-		function() {
-			var currentPosition = sample(positionDist);
-			var nextPosition = updatePosition(currentPosition, robotCommand, delay);
-			return {
-				x: gaussian(nextPosition.x, xnoise),
-				y: gaussian(nextPosition.y, ynoise),
-				theta: gaussian(nextPosition.theta, thetanoise)
-			};
-		}
-	);
-
-	var robotMovement = robot[robotCommand];
-	robotMovement(delay);
-	stop(0.1);
-
-	// continue
-	autonomous(newPositionDist);
+		// continue
+		autonomous(n-1, newPositionDist, newMap);
+	}
 };
 
-autonomous();
+// moveForward(9);
+
+autonomous(20);
 
 stop();
 
