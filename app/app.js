@@ -76,7 +76,7 @@ function updateMap(mappyMap) {
 		objectCircle = mapCanvas.circle(
 			objectLocation.x*scale + mapHalfWidth,
 			600 - (objectLocation.y*scale + mapHalfWidth),
-			10).attr({fill: 'blue'});
+			10).attr({fill: objectLocation.color, 'fill-opacity': 0.2});
 	}
 }
 
@@ -114,8 +114,8 @@ currentX_plot = currentX + mapHalfWidth;
 currentY_plot = currentY + mapHalfWidth;
 var circle = mapCanvas.circle(currentX_plot, currentY_plot, 10).attr({fill: "red"});
 
-rect1 = mapCanvas.rect(0,0,600,600).attr({fill: "white", 'fill-opacity': 1});
 updatePosition(currentX, currentY);
+rect1 = mapCanvas.rect(0,0,600,600).attr({fill: "white", 'fill-opacity': 1});
 
 var aMap = [];
 

@@ -7,6 +7,8 @@ var stop = robot.stop;
 var sendPosition = robot.sendPosition;
 var moveForward = robot.moveForward;
 var sendMap = robot.sendMap;
+var turnRight = robot.turnRight;
+var turnLeft = robot.turnLeft;
 
 connect();
 
@@ -28,7 +30,7 @@ var printObjectEstimate = function(aMap) {
 
 var getLeftDistance = robot.getLeftDistance;
 var getRightDistance = robot.getRightDistance;
-var secPerFullTurn = 8.75;
+var secPerFullTurn = 13;
 var turnPerSec = secPerFullTurn / (2*Math.PI);
 var secPerPaper = 3.75;
 // var secPerPaper = 9;
@@ -84,16 +86,35 @@ var robotCommandPrior = function() {
 		]);
 }
 
-var getObjectPosition = function(positionDist, ldistance, rdistance) {
+var getObjectPositions = function(positionDist, ldistance, rdistance) {
 	var xdist = Infer({method: 'enumerate'}, function() {return sample(positionDist).x;});
 	var ydist = Infer({method: 'enumerate'}, function() {return sample(positionDist).y;});
 	var thetadist = Infer({method: 'enumerate'}, function() {return sample(positionDist).theta;});
 	var theta = expectation(thetadist);
 	var x = expectation(xdist);
-	var y = expectation(ydist)
-	return {
-		x: x + Math.cos(theta)*rdistance,
-		y: y + Math.sin(theta)*rdistance
+	var y = expectation(ydist);
+	console.log(rdistance)
+	if (ldistance > 10) {
+		return [
+			{
+				x: x + Math.cos(theta)*rdistance,
+				y: y + Math.sin(theta)*rdistance,
+				color: 'blue'
+			},
+			{
+				x: x + Math.cos(theta)*4,
+				y: y + Math.sin(theta)*4,
+				color: 'green'
+			}
+		]
+	} else {
+		return [
+			{
+				x: x + Math.cos(theta)*rdistance,
+				y: y + Math.sin(theta)*rdistance,
+				color: 'blue'
+			}
+		]
 	}
 }
 
@@ -110,7 +131,7 @@ var autonomous = function(n, positionDist, currentMap) {
 		var rdistance = getRightDistance();
 
 		printLocationEstimate(positionDist);
-		var newMap = currentMap.concat([getObjectPosition(positionDist, ldistance, rdistance)]);
+		var newMap = currentMap.concat(getObjectPositions(positionDist, ldistance, rdistance));
 		printObjectEstimate(newMap);
 
 		var commands = sample(Infer(
@@ -165,9 +186,12 @@ var autonomous = function(n, positionDist, currentMap) {
 	}
 };
 
+// turnRight(secPerFullTurn);
+// turnLeft(secPerFullTurn);
+
 // moveForward(9);
 
-autonomous(20);
+autonomous(100);
 
 stop();
 
