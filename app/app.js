@@ -45,19 +45,20 @@ function getRightDistance(s, k, a) {
 		})
 	}
 
-function getPosition(s, k, a) {
-		socket.emit('getPositionForMapping');
+function getPosition() {
+		socket.emit('get-position');
 	    socket.on('done', function(position) {
 	    	socket.removeListener('done');
-			console.log('robot sent me back "position" ' + position);
+			console.log('robot sent me back "position" ' + position.x + ',' + position.y);
+			updatePosition(position.x, position.y);
 		})
 	}
 
 function updatePosition(x, y) {
 	mapCanvas.clear();
 	rect1 = mapCanvas.rect(0,0,600,600).attr({fill: "white"});
-	currentX_plot = x + mapHalfWidth;
-	currentY_plot = y + mapHalfWidth;
+	currentX_plot = x*3 + mapHalfWidth;
+	currentY_plot = y*3 + mapHalfWidth;
 	circle = mapCanvas.circle(currentX_plot, currentY_plot, 10).attr({fill: "red"});
 }
 

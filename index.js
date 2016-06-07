@@ -60,7 +60,7 @@ board.on('ready', function () {
     speed = 255;
     leftDistance = null;
     rightDistance = null;
-    position = 0;
+    position = {x: 0, y: 0};
 
     io.on('connection', function (socket) {
 
@@ -85,13 +85,13 @@ board.on('ready', function () {
             socket.emit('done', rightDistance);
         });
 
-        socket.on('sendPositionForMapping', function (data) {
+        socket.on('send-position', function (data) {
             console.log('robot recieved update of position');
             position = data;
-            socket.emit('done');
+            socket.emit('done', position);
         });
 
-        socket.on('getPositionForMapping', function () {
+        socket.on('get-position', function () {
             console.log('robot recieved query for position');
             socket.emit('done', position);
         });

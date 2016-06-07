@@ -4,28 +4,31 @@ display('start');
 
 var connect = robot.connect;
 var stop = robot.stop;
+var sendPosition = robot.sendPosition;
 
 connect();
 
 var printLocationEstimate = function(positionDist) {
-	var discretizedLocation = Infer(
-		{method:'enumerate'},
-		function() {
-			var pos = sample(positionDist);
-			return {
-				x: Math.round(pos.x/10),
-				y: Math.round(pos.y/10)
-			}
-		}
-	);
-	map(function(x) {
-		display(
-			map(function(y) {
-				var pos = {x: x, y: y};
-				return (Math.round(Math.exp(discretizedLocation.score(pos))*100)/100).toFixed(2);
-			}, robot.range(5, -5)).join(' ')
-		);
-	}, robot.range(-5, 5));
+	// var discretizedLocation = Infer(
+	// 	{method:'enumerate'},
+	// 	function() {
+	// 		var pos = sample(positionDist);
+	// 		return {
+	// 			x: Math.round(pos.x/10),
+	// 			y: Math.round(pos.y/10)
+	// 		}
+	// 	}
+	// );
+	// map(function(x) {
+	// 	display(
+	// 		map(function(y) {
+	// 			var pos = {x: x, y: y};
+	// 			return (Math.round(Math.exp(discretizedLocation.score(pos))*100)/100).toFixed(2);
+	// 		}, robot.range(5, -5)).join(' ')
+	// 	);
+	// }, robot.range(-5, 5));
+	var pos = sample(positionDist);
+	sendPosition({x: pos.x, y: pos.y});
 
 	// display(discretizedLocation.support());
 };
@@ -134,16 +137,6 @@ var autonomous = function(positionDist) {
 		}
 	);
 
-	// sendPosition(newPositionDist);
-	// display(sample(newPositionDist));
-
-	// console.log(robotCommand);
-	// console.log(delay);
-	// console.log("getLeftDistance: " + ldistance);
-	// console.log("getRightDistance: " + rdistance);
-
-	// actually move
-	// display(robotCommand + ' for ' + delay + 's');
 	var robotMovement = robot[robotCommand];
 	robotMovement(delay);
 	stop(0.1);
@@ -154,24 +147,6 @@ var autonomous = function(positionDist) {
 
 autonomous();
 
-// var moveForward = robot.moveForward;
-// moveForward(1);
-
-// var turnRight = robot.turnRight;
-// turnRight(8.75);
-// // var turnLeft = robot.turnLeft;
-// // turnLeft(8.5);
-
 stop();
 
-// display('connected');
-// var moveForward = robot.moveForward;
-// display('moveForward defined');
-// moveForward();
-// display('moveForward');
-// moveForward();
-// display('moveForward');
-// moveForward();
-// display('moveForward');
-
-// "finished";
+"finished";
