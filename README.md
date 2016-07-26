@@ -2,17 +2,17 @@
 
 ## Wiring
 
-3A is hooked to arduino digital pin 3;
-4A is hooked to arduino digital pin 5;
-1A is hooked to arduino digital pin 10;
-2A is hooked to arduino digital pin 9;
-3,4EN and 1,2EN hooked directly to arduino 5V output pin;
-hbridge pin labels from: http://www.ti.com/lit/ds/symlink/sn754410.pdf
-loosely following this wiring diagram:
+- 3A is hooked to arduino digital pin 3;
+- 4A is hooked to arduino digital pin 5;
+- 1A is hooked to arduino digital pin 10;
+- 2A is hooked to arduino digital pin 9;
+- 3,4EN and 1,2EN hooked directly to arduino 5V output pin;
+- hbridge pin labels from: http://www.ti.com/lit/ds/symlink/sn754410.pdf (Section 6, page 3)
+- loosely following this wiring diagram:
 https://github.com/rwaldron/johnny-five/blob/master/docs/motor-hbridge.md
 
-Left trigger and echo both hooked to 12.
-Right trigger and echo both hooked to 7.
+- Left trigger and echo both hooked to 12.
+- Right trigger and echo both hooked to 7.
 
 ## Installation
 
