@@ -33,8 +33,8 @@ board.on('ready', function () {
             //[9, 10]
             {
                 pins: {
-                  pwm: 10,
-                  dir: 9
+                  pwm: 9,
+                  dir: 6
                 },
                 invertPWM: true
             }
@@ -45,11 +45,11 @@ board.on('ready', function () {
 
     sensors = {
         right: new five.Proximity({
-            pin: 7, 
+            pin: 3, 
             controller: "HCSR04"
             }),
         left: new five.Proximity({
-            pin: 12, 
+            pin: 7, 
             controller: "HCSR04"
             })
         // 6 is right trigger, 7 is right echo
